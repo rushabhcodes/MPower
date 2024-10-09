@@ -78,7 +78,7 @@ class _UserDataCollectionState extends State<UserDataCollection> {
         },
         finishButtonStyle: FinishButtonStyle(
           backgroundColor: Theme.of(context).colorScheme.onPrimary,
-          foregroundColor: Theme.of(context).colorScheme.background,
+          foregroundColor: Theme.of(context).colorScheme.surface,
           elevation: 3,
         ),
       ),

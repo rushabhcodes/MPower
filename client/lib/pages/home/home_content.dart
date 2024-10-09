@@ -23,7 +23,7 @@ class _HomeContentState extends State<HomeContent> {
   int _dailyStreak = 0;
   DateTime? _lastChallengeCompletionTime;
   bool _isLocked = false;
-  int _lockDurationInHours = 24;
+  final int _lockDurationInHours = 24;
 
   @override
   void initState() {
@@ -173,7 +173,7 @@ class _HomeContentState extends State<HomeContent> {
               childCount: widget.numberOfChallenges + 6,
             ),
           ),
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
         ),
       ],
     );
@@ -198,7 +198,7 @@ class _HomeContentState extends State<HomeContent> {
       future: userRef.child('name').get(),
       builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text(
             'Error loading name',
@@ -253,7 +253,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
             Row(
               children: [
-                Icon(Icons.local_fire_department, color: Colors.orange),
+                const Icon(Icons.local_fire_department, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text(
                   '$_dailyStreak days',

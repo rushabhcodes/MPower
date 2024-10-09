@@ -7,8 +7,8 @@ class SupportGroupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Support Groups'),
-        backgroundColor: Theme.of(context).colorScheme.background,
+        title: const Text('Support Groups'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: _buildSupportGroupsList(),
     );
@@ -59,7 +59,7 @@ class SupportGroupScreen extends StatelessWidget {
 
   Widget _buildSupportGroupCard(SupportGroup group) {
     return Card(
-      margin: EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -68,18 +68,18 @@ class SupportGroupScreen extends StatelessWidget {
               backgroundImage: NetworkImage(group.imageUrl),
               radius: 40,
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     group.name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(group.description),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text('Members: ${group.members}'),
                 ],
               ),
@@ -88,7 +88,7 @@ class SupportGroupScreen extends StatelessWidget {
               onPressed: () {
                 _joinSupportGroup(group);
               },
-              child: Text('Join'),
+              child: const Text('Join'),
             ),
           ],
         ),

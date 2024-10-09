@@ -7,8 +7,8 @@ class MentalHealthSpecialistsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Connect with Specialists'),
-        backgroundColor: Theme.of(context).colorScheme.background,
+        title: const Text('Connect with Specialists'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: _buildSpecialistsList(),
     );
@@ -89,7 +89,7 @@ class MentalHealthSpecialistsScreen extends StatelessWidget {
 
   Widget _buildSpecialistCard(MentalHealthSpecialist specialist) {
     return Card(
-      margin: EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -98,18 +98,18 @@ class MentalHealthSpecialistsScreen extends StatelessWidget {
               backgroundImage: NetworkImage(specialist.profileImage),
               radius: 40,
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     specialist.name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(specialist.specialty),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text('Experience: ${specialist.experience}'),
                 ],
               ),
@@ -118,7 +118,7 @@ class MentalHealthSpecialistsScreen extends StatelessWidget {
               onPressed: () {
                 _connectWithSpecialist(specialist);
               },
-              child: Text('Connect'),
+              child: const Text('Connect'),
             ),
           ],
         ),

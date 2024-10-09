@@ -31,7 +31,7 @@ class _AiChatState extends State<AiChat> {
 
   Widget _buildUI() {
     return DashChat(
-      inputOptions: InputOptions(
+      inputOptions: const InputOptions(
         trailing: [], // Removed the image upload button
         inputDecoration: InputDecoration(
           hintText: 'Type a message',

@@ -49,7 +49,7 @@ class _MainScreenState extends State<HomeScreen> {
       if (await googleSignIn.isSignedIn()) {
         await googleSignIn.signOut();
       }
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
             Routes.loginScreen, (Route<dynamic> route) => false);
@@ -57,7 +57,7 @@ class _MainScreenState extends State<HomeScreen> {
     } catch (e) {
       print("Error during logout: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content:
                 Text('An error occurred during logout. Please try again.')));
       }
@@ -67,7 +67,7 @@ class _MainScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Center(
+      return const Center(
           child:
               CircularProgressIndicator()); // Show a loader while checking authentication
     }
@@ -90,7 +90,7 @@ class _MainScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
               );
             },
           ),
@@ -105,11 +105,11 @@ class _MainScreenState extends State<HomeScreen> {
   }
 
   List<Widget> get _screens => [
-        HomeContent(),
-        ActivitiesScreen(),
-        AiChat(),
-        MentalHealthSpecialistsScreen(),
-        SupportGroupScreen(),
+        const HomeContent(),
+        const ActivitiesScreen(),
+        const AiChat(),
+        const MentalHealthSpecialistsScreen(),
+        const SupportGroupScreen(),
       ];
 
   Widget _buildDrawer(BuildContext context) {
@@ -119,7 +119,7 @@ class _MainScreenState extends State<HomeScreen> {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
             ),
             child: Text(
               'MPower',
@@ -130,29 +130,29 @@ class _MainScreenState extends State<HomeScreen> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
-            leading: Icon(Icons.help),
-            title: Text('Help'),
+            leading: const Icon(Icons.help),
+            title: const Text('Help'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
             onTap: () {
               _logout();
             },
           ),
           ListTile(
-            leading: Icon(Icons.sunny),
-            title: Text('Theme'),
+            leading: const Icon(Icons.sunny),
+            title: const Text('Theme'),
             onTap: () => Provider.of<ThemeNotifier>(context, listen: false)
                 .toggleTheme(),
           ),
@@ -163,7 +163,7 @@ class _MainScreenState extends State<HomeScreen> {
 
   Widget _buildFloatingBottomAppBar() {
     return Padding(
-      padding: EdgeInsets.only(bottom: 20, left: 16, right: 16),
+      padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
       child: Container(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(100),
@@ -176,35 +176,35 @@ class _MainScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   IconButton(
-                    icon: Icon(Icons.home),
+                    icon: const Icon(Icons.home),
                     onPressed: () => setState(() => _currentIndex = 0),
                     color: _currentIndex == 0
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.games_outlined),
+                    icon: const Icon(Icons.games_outlined),
                     onPressed: () => setState(() => _currentIndex = 1),
                     color: _currentIndex == 1
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.chat_outlined),
+                    icon: const Icon(Icons.chat_outlined),
                     onPressed: () => setState(() => _currentIndex = 2),
                     color: _currentIndex == 2
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.healing),
+                    icon: const Icon(Icons.healing),
                     onPressed: () => setState(() => _currentIndex = 3),
                     color: _currentIndex == 3
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.group),
+                    icon: const Icon(Icons.group),
                     onPressed: () => setState(() => _currentIndex = 4),
                     color: _currentIndex == 4
                         ? Theme.of(context).colorScheme.onPrimary

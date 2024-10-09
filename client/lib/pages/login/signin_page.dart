@@ -100,7 +100,7 @@ class _SigninScreenState extends State<SigninScreen> {
                               Icon(
                                 Icons.login,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                               SizedBox(width: 10),
                               Text(
@@ -108,7 +108,7 @@ class _SigninScreenState extends State<SigninScreen> {
                                 style: TextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .onBackground,
+                                      .onSurface,
                                   fontSize: 20,
                                 ),
                               ),
@@ -201,7 +201,7 @@ class _SigninScreenState extends State<SigninScreen> {
             builder: (BuildContext context) {
               final theme = Theme.of(context);
               return AlertDialog(
-                backgroundColor: theme.colorScheme.background,
+                backgroundColor: theme.colorScheme.surface,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 title: Text(
@@ -222,7 +222,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.background,
+                      foregroundColor: theme.colorScheme.surface,
                       backgroundColor: theme.colorScheme.onPrimary,
                     ),
                     onPressed: () => Navigator.of(context).pop(true),

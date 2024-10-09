@@ -19,19 +19,19 @@ class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case introScreen:
-        return MaterialPageRoute(builder: (_) => IntroScreen());
+        return MaterialPageRoute(builder: (_) => const IntroScreen());
       case loginScreen:
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case signupScreen:
         return MaterialPageRoute(builder: (_) => SignupScreen());
       case signinScreen:
-        return MaterialPageRoute(builder: (_) => SigninScreen());
+        return MaterialPageRoute(builder: (_) => const SigninScreen());
       case homeScreen:
-        return MaterialPageRoute(builder: (_) => HomeScreen());
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
       case resetPasswordScreen:
-        return MaterialPageRoute(builder: (_) => ResetPasswordScreen());
+        return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case userDataCollection:
-        return MaterialPageRoute(builder: (_) => UserDataCollection());
+        return MaterialPageRoute(builder: (_) => const UserDataCollection());
       default:
         return _errorRoute();
     }
@@ -39,7 +39,7 @@ class Routes {
 
   static Route<dynamic> _errorRoute() {
     return MaterialPageRoute(builder: (_) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: Text('ERROR: Page not found'),
         ),

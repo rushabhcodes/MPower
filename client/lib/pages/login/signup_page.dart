@@ -99,7 +99,7 @@
                                 Icon(
                                   Icons.app_registration,
                                   color:
-                                      Theme.of(context).colorScheme.onBackground,
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                                 SizedBox(width: 10),
                                 Text(
@@ -107,7 +107,7 @@
                                   style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
-                                        .onBackground,
+                                        .onSurface,
                                     fontSize: 20,
                                   ),
                                 ),

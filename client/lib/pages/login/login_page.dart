@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,7 +71,7 @@ class LoginScreen extends StatelessWidget {
                               Icon(
                                 Icons.login, // Replace with the icon you want
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                               SizedBox(
                                   width: 10), // Adjust the spacing as needed
@@ -78,7 +80,7 @@ class LoginScreen extends StatelessWidget {
                                 style: TextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .onBackground,
+                                      .onSurface,
                                   fontSize:
                                       20, // Adjust the font size as needed
                                 ),
@@ -114,7 +116,7 @@ class LoginScreen extends StatelessWidget {
                                   height: 20,
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .onBackground // Adjust the size as needed
+                                      .onSurface // Adjust the size as needed
                                   ),
                               SizedBox(
                                   width: 10), // Adjust the spacing as needed
@@ -123,7 +125,7 @@ class LoginScreen extends StatelessWidget {
                                 style: TextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .onBackground,
+                                      .onSurface,
                                   fontSize:
                                       20, // Adjust the font size as needed
                                 ),
@@ -204,7 +206,7 @@ class LoginScreen extends StatelessWidget {
             builder: (BuildContext context) {
               final theme = Theme.of(context);
               return AlertDialog(
-                backgroundColor: theme.colorScheme.background,
+                backgroundColor: theme.colorScheme.surface,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 title: Text(
@@ -224,12 +226,12 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   ElevatedButton(
-                    child: Text('Yes'),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.background,
+                      foregroundColor: theme.colorScheme.surface,
                       backgroundColor: theme.colorScheme.onPrimary,
                     ),
                     onPressed: () => Navigator.of(context).pop(true),
+                    child: Text('Yes'),
                   ),
                 ],
               );
