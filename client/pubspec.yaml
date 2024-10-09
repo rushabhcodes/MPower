@@ -43,9 +43,12 @@ dependencies:
   shared_preferences: ^2.3.2
 
 dev_dependencies:
+  dash_chat_2: ^0.0.21
+  flutter_gemini: ^2.0.5
   flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
+  image_picker: ^1.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

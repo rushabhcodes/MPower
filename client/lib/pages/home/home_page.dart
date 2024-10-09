@@ -1,3 +1,4 @@
+import 'package:client/pages/aichat/ai_chat.dart';
 import 'package:client/utils/theme_notifier.dart';
 import 'package:client/utils/navigation.dart';
 import 'package:client/pages/home/home_content.dart';
@@ -20,7 +21,7 @@ class _MainScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     HomeContent(),
     LeaderboardContent(),
-    JournalContent(),
+    AiChat(),
     TherapyContent(),
     SupportGroupContent(),
   ];

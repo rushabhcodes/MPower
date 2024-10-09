@@ -1,4 +1,6 @@
 import 'package:client/utils/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -77,9 +79,12 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+
   Widget _buildHeader(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser; // Get the current user
+  if (user == null) {
     return Text(
-      'Welcome back,',
+      'Welcome back!',
       style: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.bold,
@@ -87,6 +92,52 @@ class _HomeContentState extends State<HomeContent> {
       ),
     ).animate().fadeIn(duration: 500.ms);
   }
+
+  final DatabaseReference userRef = FirebaseDatabase.instance
+      .ref()
+      .child('users')
+      .child(user.uid); // Reference to user's data
+
+  return FutureBuilder(
+    future: userRef.child('name').get(), // Fetch the name
+    builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator(); // Show loading indicator while fetching
+      } else if (snapshot.hasError) {
+        return Text(
+          'Error loading name',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ).animate().fadeIn(duration: 500.ms);
+      } else if (snapshot.hasData && snapshot.data!.value != null) {
+        final String name = snapshot.data!.value.toString(); // Extract name
+        return Text(
+          'Welcome back $name!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ).animate().fadeIn(duration: 500.ms);
+      } else {
+        return Text(
+          'Welcome back!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ).animate().fadeIn(duration: 500.ms);
+      }
+    },
+  );
+}
+
+   
+  
 
   Widget _buildDailyStreak(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
