@@ -30,12 +30,7 @@ class _AiChatState extends State<AiChat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          "Gemini Chat",
-        ),
-      ),
+      
       body: _buildUI(),
     );
   }
