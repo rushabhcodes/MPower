@@ -17,11 +17,114 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   final ScrollController _scrollController = ScrollController();
   bool _isScrollingDown = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  Map<int, bool> _completedChallenges = {};
+  int _dailyStreak = 0;
+  DateTime? _lastChallengeCompletionTime;
+  bool _isLocked = false;
+  int _lockDurationInHours = 24;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _loadUserData(); // Load user's challenges and streak from Firebase
+  }
+
+  // Load user data including challenges and daily streak
+  void _loadUserData() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final userRef = _dbRef.child('users').child(user.uid);
+
+    // Load completed challenges
+    DataSnapshot completedSnapshot = await userRef.child('completedChallenges').get();
+    if (completedSnapshot.exists) {
+      Map<dynamic, dynamic> completedData = completedSnapshot.value as Map;
+      setState(() {
+        _completedChallenges = completedData.map((key, value) => MapEntry(int.parse(key), value as bool));
+      });
+    }
+
+    // Load daily streak
+    DataSnapshot streakSnapshot = await userRef.child('dailyStreak').get();
+    if (streakSnapshot.exists) {
+      setState(() {
+        _dailyStreak = streakSnapshot.value as int;
+      });
+    }
+
+    // Load last challenge completion time
+    DataSnapshot lastTimeSnapshot = await userRef.child('lastChallengeCompletionTime').get();
+    if (lastTimeSnapshot.exists) {
+      _lastChallengeCompletionTime = DateTime.fromMillisecondsSinceEpoch(lastTimeSnapshot.value as int);
+      _checkIfChallengesShouldLock();
+    }
+  }
+
+  // Check if challenges should lock after 24 hours
+  void _checkIfChallengesShouldLock() {
+    if (_lastChallengeCompletionTime == null) return;
+
+    final currentTime = DateTime.now();
+    final timeDifference = currentTime.difference(_lastChallengeCompletionTime!);
+
+    setState(() {
+      _isLocked = timeDifference.inHours >= _lockDurationInHours;
+    });
+  }
+
+  // Update the task completion, streak, and last completion time in Firebase
+  void _updateTaskCompletion(int index) async {
+    if (_isLocked || (_completedChallenges[index] ?? false)) {
+      // If challenges are locked or already completed, don't allow completion
+      return;
+    }
+
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _completedChallenges[index] = true; // Mark the task as completed
+    });
+
+    final userRef = _dbRef.child('users').child(user.uid);
+    await userRef.child('completedChallenges').update({index.toString(): true});
+
+    // Update last challenge completion time
+    final currentTime = DateTime.now();
+    await userRef.child('lastChallengeCompletionTime').set(currentTime.millisecondsSinceEpoch);
+
+    // Update the daily streak
+    _updateDailyStreak(currentTime);
+  }
+
+  // Update the daily streak based on challenge completion
+  void _updateDailyStreak(DateTime currentTime) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    if (_lastChallengeCompletionTime != null) {
+      final timeDifference = currentTime.difference(_lastChallengeCompletionTime!);
+      if (timeDifference.inHours < _lockDurationInHours) {
+        setState(() {
+          _dailyStreak += 1; // Increment streak if within 24 hours
+        });
+      } else {
+        setState(() {
+          _dailyStreak = 1; // Reset streak if more than 24 hours passed
+        });
+      }
+    } else {
+      setState(() {
+        _dailyStreak = 1; // Start streak on first completion
+      });
+    }
+
+    final userRef = _dbRef.child('users').child(user.uid);
+    await userRef.child('dailyStreak').set(_dailyStreak);
   }
 
   @override
@@ -32,15 +135,13 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (!_isScrollingDown) {
         setState(() {
           _isScrollingDown = true;
         });
       }
-    } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
       if (_isScrollingDown) {
         setState(() {
           _isScrollingDown = false;
@@ -69,8 +170,7 @@ class _HomeContentState extends State<HomeContent> {
                 int challengeIndex = index - 6;
                 return _buildChallengeItem(context, challengeIndex);
               },
-              childCount:
-                  widget.numberOfChallenges + 6, // Add 6 for the header items
+              childCount: widget.numberOfChallenges + 6,
             ),
           ),
           padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
@@ -79,65 +179,58 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-
   Widget _buildHeader(BuildContext context) {
-  final user = FirebaseAuth.instance.currentUser; // Get the current user
-  if (user == null) {
-    return Text(
-      'Welcome back!',
-      style: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    ).animate().fadeIn(duration: 500.ms);
+    final user = _auth.currentUser;
+    if (user == null) {
+      return Text(
+        'Welcome back!',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ).animate().fadeIn(duration: 500.ms);
+    }
+
+    final DatabaseReference userRef = _dbRef.child('users').child(user.uid);
+
+    return FutureBuilder(
+      future: userRef.child('name').get(),
+      builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text(
+            'Error loading name',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ).animate().fadeIn(duration: 500.ms);
+        } else if (snapshot.hasData && snapshot.data!.value != null) {
+          final String name = snapshot.data!.value.toString();
+          return Text(
+            'Welcome back $name!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ).animate().fadeIn(duration: 500.ms);
+        } else {
+          return Text(
+            'Welcome back!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ).animate().fadeIn(duration: 500.ms);
+        }
+      },
+    );
   }
-
-  final DatabaseReference userRef = FirebaseDatabase.instance
-      .ref()
-      .child('users')
-      .child(user.uid); // Reference to user's data
-
-  return FutureBuilder(
-    future: userRef.child('name').get(), // Fetch the name
-    builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return CircularProgressIndicator(); // Show loading indicator while fetching
-      } else if (snapshot.hasError) {
-        return Text(
-          'Error loading name',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ).animate().fadeIn(duration: 500.ms);
-      } else if (snapshot.hasData && snapshot.data!.value != null) {
-        final String name = snapshot.data!.value.toString(); // Extract name
-        return Text(
-          'Welcome back $name!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ).animate().fadeIn(duration: 500.ms);
-      } else {
-        return Text(
-          'Welcome back!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ).animate().fadeIn(duration: 500.ms);
-      }
-    },
-  );
-}
-
-   
-  
 
   Widget _buildDailyStreak(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -163,7 +256,7 @@ class _HomeContentState extends State<HomeContent> {
                 Icon(Icons.local_fire_department, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text(
-                  '5 days',
+                  '$_dailyStreak days',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -175,10 +268,7 @@ class _HomeContentState extends State<HomeContent> {
           ],
         ),
       ),
-    )
-        .animate()
-        .fadeIn(duration: 500.ms)
-        .slideY(begin: 0.2, end: 0, duration: 500.ms);
+    ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.2, end: 0, duration: 500.ms);
   }
 
   Widget _buildChallengesHeader(BuildContext context) {
@@ -192,10 +282,23 @@ class _HomeContentState extends State<HomeContent> {
     ).animate().fadeIn(duration: 500.ms);
   }
 
+  final List<String> challengeDescriptions = [
+    'Spend 5 minutes practicing mindful breathing.',
+    'Write down three things you are grateful for today.',
+    'Spend one hour away from your phone and digital devices.',
+    'Write down three positive things about yourself.',
+    'Engage in light physical activity for at least 15 minutes.',
+    'Eat one meal slowly and mindfully.',
+    'Reach out to a friend or loved one today.',
+    'Spend 10 minutes meditating.',
+    'Say three positive affirmations out loud.',
+    'Spend 10-15 minutes outside enjoying nature.'
+  ];
+
   Widget _buildChallengeItem(BuildContext context, int index) {
     final colorScheme = Theme.of(context).colorScheme;
-    bool isCompleted = index == 0;
-    bool isLocked = index > 1;
+    bool isCompleted = _completedChallenges[index] ?? false;
+    bool isLocked = index > 0 && !(_completedChallenges[index - 1] ?? false); // Unlock only if the previous one is completed
     bool isLeft = index.isEven;
 
     Color cardColor = isCompleted
@@ -204,6 +307,8 @@ class _HomeContentState extends State<HomeContent> {
             ? colorScheme.secondary.withOpacity(0.2)
             : colorScheme.secondary;
 
+    String challengeDescription = challengeDescriptions[index];
+
     Widget challengeCard = Padding(
       padding: EdgeInsets.only(
           left: isLeft ? 0 : 40, right: isLeft ? 40 : 0, bottom: 16),
@@ -211,49 +316,58 @@ class _HomeContentState extends State<HomeContent> {
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: cardColor,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.surface,
+        child: InkWell(
+          onTap: isLocked || isCompleted
+              ? null
+              : () {
+                  if (!isCompleted) {
+                    _updateTaskCompletion(index);
+                  }
+                },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.surface,
+                  ),
+                  child: Icon(
+                    isCompleted
+                        ? Icons.check
+                        : isLocked
+                            ? Icons.lock
+                            : Icons.play_arrow,
+                    color: colorScheme.onPrimary,
+                  ),
                 ),
-                child: Icon(
-                  isCompleted
-                      ? Icons.check
-                      : isLocked
-                          ? Icons.lock
-                          : Icons.play_arrow,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Challenge ${index + 1}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimary,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Challenge ${index + 1}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      isLocked ? 'Locked' : 'Complete this challenge',
-                      style: TextStyle(
-                        color: colorScheme.primary.withOpacity(0.8),
+                      Text(
+                        isLocked ? 'Locked' : challengeDescription,
+                        style: TextStyle(
+                          color: colorScheme.primary.withOpacity(0.8),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

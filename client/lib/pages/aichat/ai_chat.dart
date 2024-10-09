@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:dash_chat_2/dash_chat_2.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
-import 'package:image_picker/image_picker.dart';
 
 class AiChat extends StatefulWidget {
   const AiChat({super.key});
@@ -15,36 +10,40 @@ class AiChat extends StatefulWidget {
 }
 
 class _AiChatState extends State<AiChat> {
-
   final Gemini gemini = Gemini.instance;
-
   List<ChatMessage> messages = [];
+  bool isLoading = false; // State to manage loading
 
   ChatUser currentUser = ChatUser(id: "0", firstName: "User");
   ChatUser geminiUser = ChatUser(
     id: "1",
-    firstName: "Gemini",
+    firstName: "MM",
     profileImage:
         "https://seeklogo.com/images/G/google-gemini-logo-A5787B2669-seeklogo.com.png",
   );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: _buildUI(),
     );
   }
 
   Widget _buildUI() {
     return DashChat(
-      inputOptions: InputOptions(trailing: [
-        IconButton(
-          onPressed: _sendMediaMessage,
-          icon: const Icon(
-            Icons.image,
+      inputOptions: InputOptions(
+        trailing: [], // Removed the image upload button
+        inputDecoration: InputDecoration(
+          hintText: 'Type a message',
+          hintStyle: TextStyle(color: Colors.grey), // Change hint color
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black), // Border color
           ),
-        )
-      ]),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black), // Border color on focus
+          ),
+        ),
+      ),
       currentUser: currentUser,
       onSend: _sendMessage,
       messages: messages,
@@ -54,71 +53,42 @@ class _AiChatState extends State<AiChat> {
   void _sendMessage(ChatMessage chatMessage) {
     setState(() {
       messages = [chatMessage, ...messages];
+      isLoading = true; // Set loading to true
     });
     try {
       String question = chatMessage.text;
-      List<Uint8List>? images;
-      if (chatMessage.medias?.isNotEmpty ?? false) {
-        images = [
-          File(chatMessage.medias!.first.url).readAsBytesSync(),
-        ];
-      }
-      gemini
-          .streamGenerateContent(
-        question,
-        images: images,
-      )
-          .listen((event) {
-        ChatMessage? lastMessage = messages.firstOrNull;
-        if (lastMessage != null && lastMessage.user == geminiUser) {
-          lastMessage = messages.removeAt(0);
-          String response = event.content?.parts?.fold(
-                  "", (previous, current) => "$previous ${current.text}") ??
-              "";
-          lastMessage.text += response;
-          setState(
-            () {
-              messages = [lastMessage!, ...messages];
-            },
-          );
-        } else {
-          String response = event.content?.parts?.fold(
-                  "", (previous, current) => "$previous ${current.text}") ??
-              "";
-          ChatMessage message = ChatMessage(
-            user: geminiUser,
-            createdAt: DateTime.now(),
-            text: response,
-          );
-          setState(() {
-            messages = [message, ...messages];
-          });
-        }
+      gemini.streamGenerateContent(question).listen((event) {
+        String response = event.content?.parts?.fold(
+              "", (previous, current) => "$previous ${current.text}",
+            ) ??
+            "";
+        ChatMessage message = ChatMessage(
+          user: geminiUser,
+          createdAt: DateTime.now(),
+          text: response,
+        );
+        setState(() {
+          messages = [message, ...messages];
+          isLoading = false; // Set loading to false
+        });
+      }, onError: (error) {
+        setState(() {
+          isLoading = false; // Set loading to false on error
+        });
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
       });
     } catch (e) {
+      setState(() {
+        isLoading = false; // Set loading to false on catch
+      });
       print(e);
-    }
-  }
-
-  void _sendMediaMessage() async {
-    ImagePicker picker = ImagePicker();
-    XFile? file = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (file != null) {
-      ChatMessage chatMessage = ChatMessage(
-        user: currentUser,
-        createdAt: DateTime.now(),
-        text: "Describe this picture?",
-        medias: [
-          ChatMedia(
-            url: file.path,
-            fileName: "",
-            type: MediaType.image,
-          )
-        ],
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
       );
-      _sendMessage(chatMessage);
     }
   }
 }

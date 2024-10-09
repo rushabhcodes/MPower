@@ -1,4 +1,7 @@
+import 'package:client/pages/activities/activities_page.dart';
 import 'package:client/pages/aichat/ai_chat.dart';
+import 'package:client/pages/support_group/group_list_page.dart';
+import 'package:client/pages/therapy/therapy_page.dart';
 import 'package:client/utils/theme_notifier.dart';
 import 'package:client/utils/navigation.dart';
 import 'package:client/pages/home/home_content.dart';
@@ -17,26 +20,16 @@ class HomeScreen extends StatefulWidget {
 
 class _MainScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _currentIndex = 0;
-  final List<Widget> _screens = [
-    HomeContent(),
-    LeaderboardContent(),
-    AiChat(),
-    TherapyContent(),
-    SupportGroupContent(),
-  ];
-
+  int _currentIndex = 0; // Store the current index of the bottom navigation bar
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthentication();
-    });
+    _checkAuthentication(); // Check authentication only once during init
   }
 
-  void _checkAuthentication() async {
+  Future<void> _checkAuthentication() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (mounted) {
@@ -44,7 +37,7 @@ class _MainScreenState extends State<HomeScreen> {
       }
     } else {
       setState(() {
-        _isLoading = false;
+        _isLoading = false; // Set loading to false only if authenticated
       });
     }
   }
@@ -73,49 +66,51 @@ class _MainScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? Center(
-            child:
-                CircularProgressIndicator()) // Show a loader while checking authentication
-        : Scaffold(
-            key: _scaffoldKey,
-            appBar: AppBar(
-              backgroundColor: const Color.fromRGBO(0, 0, 0, 0),
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.menu,
-                    color: Theme.of(context).colorScheme.primary),
-                onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
-                },
-              ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildCounter(Icons.local_fire_department, 0, context),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.person,
-                      color: Theme.of(context).colorScheme.primary),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProfileScreen()),
-                    );
-                  },
-                ),
-              ],
-            ),
-            drawer: _buildDrawer(context),
-            body: _screens[_currentIndex],
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            bottomNavigationBar: _buildFloatingBottomAppBar(),
-          );
+    if (_isLoading) {
+      return Center(
+          child:
+              CircularProgressIndicator()); // Show a loader while checking authentication
+    }
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: const Color.fromRGBO(0, 0, 0, 0),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.primary),
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person,
+                color: Theme.of(context).colorScheme.primary),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      drawer: _buildDrawer(context),
+      body: _screens[_currentIndex], // Keep the current index
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: _buildFloatingBottomAppBar(),
+    );
   }
+
+  List<Widget> get _screens => [
+        HomeContent(),
+        ActivitiesScreen(),
+        AiChat(),
+        MentalHealthSpecialistsScreen(),
+        SupportGroupScreen(),
+      ];
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
@@ -188,14 +183,14 @@ class _MainScreenState extends State<HomeScreen> {
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.leaderboard),
+                    icon: Icon(Icons.games_outlined),
                     onPressed: () => setState(() => _currentIndex = 1),
                     color: _currentIndex == 1
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                   ),
                   IconButton(
-                    icon: Icon(Icons.book),
+                    icon: Icon(Icons.chat_outlined),
                     onPressed: () => setState(() => _currentIndex = 2),
                     color: _currentIndex == 2
                         ? Theme.of(context).colorScheme.onPrimary
@@ -222,64 +217,5 @@ class _MainScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildCounter(IconData icon, int count, BuildContext context,
-      {Color? iconColor}) {
-    Color getIconColor() {
-      if (icon == Icons.local_fire_department) return Colors.orange;
-      if (icon == Icons.local_play) return Colors.blue;
-      return iconColor ?? Theme.of(context).colorScheme.onBackground;
-    }
-
-    return Row(
-      children: [
-        Icon(icon, color: getIconColor(), size: 20),
-        SizedBox(width: 4),
-        Text(
-          count.toString(),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class LeaderboardContent extends StatelessWidget {
-  const LeaderboardContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Leaderboard Screen'));
-  }
-}
-
-class JournalContent extends StatelessWidget {
-  const JournalContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Journal Screen'));
-  }
-}
-
-class TherapyContent extends StatelessWidget {
-  const TherapyContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Therapy Screen'));
-  }
-}
-
-class SupportGroupContent extends StatelessWidget {
-  const SupportGroupContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Support Group Screen'));
   }
 }
