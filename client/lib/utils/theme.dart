@@ -54,11 +54,10 @@ final lightTheme = ThemeData(
   colorScheme: ColorScheme.light(
     primary: lightPrimaryColor,
     secondary: lightAccentColor2,
-    background: lightAccentColor,
-    onBackground: lightTextColor,
+    onSurface: lightTextColor,
     onPrimary: lightButtonColor,
     surface: lightPureColor,
-  ).copyWith(background: lightAccentColor),
+  ).copyWith(surface: lightAccentColor),
 );
 
 final darkTheme = ThemeData(
@@ -71,9 +70,8 @@ final darkTheme = ThemeData(
   colorScheme: ColorScheme.dark(
     primary: darkPrimaryColor,
     secondary: darkAccentColor2,
-    background: darkAccentColor,
-    onBackground: darkTextColor,
+    onSurface: darkTextColor,
     onPrimary: darkButtonColor,
     surface: darkPureColor,
-  ).copyWith(background: darkAccentColor),
+  ).copyWith(surface: darkAccentColor),
 );

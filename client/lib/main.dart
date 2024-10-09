@@ -1,3 +1,4 @@
+import 'package:client/firebase_options.dart';
 import 'package:client/pages/home/home_page.dart';
 import 'package:client/pages/intro/intro_page.dart';
 import 'package:client/utils/theme.dart';
@@ -12,11 +13,14 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+
+  );
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeNotifier(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
   FlutterNativeSplash.remove();
@@ -41,7 +45,7 @@ class MyApp extends StatelessWidget {
                   );
                 } else {
                   final bool isFirstLaunch = snapshot.data ?? true;
-                  return isFirstLaunch ? const IntroScreen() : const HomeScreen();
+                  return isFirstLaunch ? const IntroScreen() :  const HomeScreen();
                 }
               }));
     });

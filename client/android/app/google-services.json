@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "613987729944",
+    "project_id": "mpower-81bb7",
+    "storage_bucket": "mpower-81bb7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:613987729944:android:177a345c70bb0396eef96d",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI5ypBOZgsuCrXQDGk-ys5iDyQlu6dxqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
