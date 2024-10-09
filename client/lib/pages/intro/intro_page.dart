@@ -12,7 +12,7 @@ class IntroScreen extends StatelessWidget {
       onFinish: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => LoginScreen()),
         );
       },
       finishButtonStyle: FinishButtonStyle(

@@ -1,4 +1,4 @@
-
+import 'package:flutter/material.dart';
 import 'package:client/pages/home/home_page.dart';
 import 'package:client/pages/intro/intro_page.dart';
 import 'package:client/pages/login/login_page.dart';
@@ -6,7 +6,6 @@ import 'package:client/pages/login/signin_page.dart';
 import 'package:client/pages/login/signup_page.dart';
 import 'package:client/pages/login/user_data_page.dart';
 import 'package:client/pages/profile/reset_password_page.dart';
-import 'package:flutter/material.dart';
 
 class Routes {
   static const String introScreen = '/';

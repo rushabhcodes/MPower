@@ -4,7 +4,7 @@ import 'package:client/pages/home/home_content.dart';
 import 'package:client/pages/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart'; 
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,10 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<HomeScreen> {
-
-  
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   int _currentIndex = 0;
   final List<Widget> _screens = [
     HomeContent(),
@@ -27,6 +24,8 @@ class _MainScreenState extends State<HomeScreen> {
     TherapyContent(),
     SupportGroupContent(),
   ];
+
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -42,6 +41,10 @@ class _MainScreenState extends State<HomeScreen> {
       if (mounted) {
         Navigator.pushReplacementNamed(context, Routes.loginScreen);
       }
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -69,42 +72,48 @@ class _MainScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(0, 0, 0, 0),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.primary),
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildCounter(Icons.local_fire_department, 0, context),           
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person,
-                color: Theme.of(context).colorScheme.primary),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      drawer: _buildDrawer(context),
-      body: _screens[_currentIndex],
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: _buildFloatingBottomAppBar(),
-    );
+    return _isLoading
+        ? Center(
+            child:
+                CircularProgressIndicator()) // Show a loader while checking authentication
+        : Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              backgroundColor: const Color.fromRGBO(0, 0, 0, 0),
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.menu,
+                    color: Theme.of(context).colorScheme.primary),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCounter(Icons.local_fire_department, 0, context),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.person,
+                      color: Theme.of(context).colorScheme.primary),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
+            drawer: _buildDrawer(context),
+            body: _screens[_currentIndex],
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            bottomNavigationBar: _buildFloatingBottomAppBar(),
+          );
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -128,7 +137,6 @@ class _MainScreenState extends State<HomeScreen> {
             leading: Icon(Icons.settings),
             title: Text('Settings'),
             onTap: () {
-              // Handle settings tap
               Navigator.pop(context);
             },
           ),
@@ -136,7 +144,6 @@ class _MainScreenState extends State<HomeScreen> {
             leading: Icon(Icons.help),
             title: Text('Help'),
             onTap: () {
-              // Handle help tap
               Navigator.pop(context);
             },
           ),
@@ -153,7 +160,6 @@ class _MainScreenState extends State<HomeScreen> {
             onTap: () => Provider.of<ThemeNotifier>(context, listen: false)
                 .toggleTheme(),
           ),
-          // Add more ListTiles for additional menu items
         ],
       ),
     );
@@ -219,7 +225,6 @@ class _MainScreenState extends State<HomeScreen> {
 
   Widget _buildCounter(IconData icon, int count, BuildContext context,
       {Color? iconColor}) {
-   
     Color getIconColor() {
       if (icon == Icons.local_fire_department) return Colors.orange;
       if (icon == Icons.local_play) return Colors.blue;

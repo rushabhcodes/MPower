@@ -10,8 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +28,7 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text("Emo",
+            Text("MPower",
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 40,
@@ -179,7 +177,7 @@ class LoginScreen extends StatelessWidget {
       Navigator.pop(context); // Remove loading indicator
 
       if (userCredential.user != null) {
-        // if (userCredential.user!.emailVerified) {
+        if (userCredential.user!.emailVerified) {
           // Check if user data exists
           final databaseReference = FirebaseDatabase.instance.ref();
           final userDataSnapshot = await databaseReference
@@ -194,61 +192,60 @@ class LoginScreen extends StatelessWidget {
             // User data doesn't exist, go to data collection page
             Navigator.pushReplacementNamed(context, Routes.userDataCollection);
           }
-        // }
-        //  else {
-        //   // Email is not verified
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //         content: Text('Please verify your email before logging in.')),
-        //   );
-        //   // Optionally, offer to resend verification email
-        //   bool? resend = await showDialog<bool>(
-        //     context: context,
-        //     builder: (BuildContext context) {
-        //       final theme = Theme.of(context);
-        //       return AlertDialog(
-        //         backgroundColor: theme.colorScheme.background,
-        //         shape: RoundedRectangleBorder(
-        //             borderRadius: BorderRadius.circular(16)),
-        //         title: Text(
-        //           'Email not verified',
-        //           style: TextStyle(color: theme.colorScheme.onPrimary),
-        //         ),
-        //         content: Text(
-        //           'Would you like to resend the verification email?',
-        //           style: TextStyle(color: theme.colorScheme.primary),
-        //         ),
-        //         actions: <Widget>[
-        //           TextButton(
-        //             child: Text(
-        //               'No',
-        //               style: TextStyle(color: theme.colorScheme.onPrimary),
-        //             ),
-        //             onPressed: () => Navigator.of(context).pop(false),
-        //           ),
-        //           ElevatedButton(
-        //             style: ElevatedButton.styleFrom(
-        //               foregroundColor: theme.colorScheme.background,
-        //               backgroundColor: theme.colorScheme.onPrimary,
-        //             ),
-        //             onPressed: () => Navigator.of(context).pop(true),
-        //             child: Text('Yes'),
-        //           ),
-        //         ],
-        //       );
-        //     },
-        //   );
-        //   if (resend == true) {
-        //     await userCredential.user!.sendEmailVerification();
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       SnackBar(
-        //           content: Text(
-        //               'Verification email sent. Please check your inbox.')),
-        //     );
-        //   }
-        //   // Sign out the user since they haven't verified their email
-        //   await FirebaseAuth.instance.signOut();
-        // }
+        } else {
+          // Email is not verified
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Please verify your email before logging in.')),
+          );
+          // Optionally, offer to resend verification email
+          bool? resend = await showDialog<bool>(
+            context: context,
+            builder: (BuildContext context) {
+              final theme = Theme.of(context);
+              return AlertDialog(
+                backgroundColor: theme.colorScheme.background,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                title: Text(
+                  'Email not verified',
+                  style: TextStyle(color: theme.colorScheme.onPrimary),
+                ),
+                content: Text(
+                  'Would you like to resend the verification email?',
+                  style: TextStyle(color: theme.colorScheme.primary),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text(
+                      'No',
+                      style: TextStyle(color: theme.colorScheme.onPrimary),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  ElevatedButton(
+                    child: Text('Yes'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.background,
+                      backgroundColor: theme.colorScheme.onPrimary,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
+              );
+            },
+          );
+          if (resend == true) {
+            await userCredential.user!.sendEmailVerification();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(
+                      'Verification email sent. Please check your inbox.')),
+            );
+          }
+          // Sign out the user since they haven't verified their email
+          await FirebaseAuth.instance.signOut();
+        }
       }
     } catch (e) {
       Navigator.pop(context); // Remove loading indicator
