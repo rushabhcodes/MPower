@@ -1,5 +1,6 @@
 import 'package:client/pages/activities/breathing_excersise_screen.dart';
 import 'package:client/pages/activities/bubble_game.dart';
+import 'package:client/pages/activities/music_player.dart';
 import 'package:flutter/material.dart';
 
 class ActivitiesScreen extends StatelessWidget {
@@ -7,24 +8,26 @@ class ActivitiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activities'),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          childAspectRatio: 1.5,
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-          children: [
-            _buildActivityButton(context, 'Breathing',() => _onBreathingSelected(context)),
-            _buildActivityButton(context, 'Bubble Burst',() => _onBubbleBurstSelected(context)),
-            _buildActivityButton(context, 'Soothing Music', _onSoothingMusicSelected),
-            _buildActivityButton(context, 'Exercises', _onExercisesSelected),
-          ],
+    return Material(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Activities'),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 1.5,
+            crossAxisSpacing: 16.0,
+            mainAxisSpacing: 16.0,
+            children: [
+              _buildActivityButton(context, 'Breathing',() => _onBreathingSelected(context)),
+              _buildActivityButton(context, 'Bubble Burst',() => _onBubbleBurstSelected(context)),
+              _buildActivityButton(context, 'Soothing Music', () => _onSoothingMusicSelected(context)),
+              _buildActivityButton(context, 'Exercises', _onExercisesSelected),
+            ],
+          ),
         ),
       ),
     );
@@ -58,9 +61,10 @@ class ActivitiesScreen extends StatelessWidget {
     Navigator.push(context, MaterialPageRoute(builder: (context) => BubbleGamePage()));
   }
 
-  void _onSoothingMusicSelected() {
+  void _onSoothingMusicSelected(context) {
     // Navigate to Soothing Music activity
     print('Soothing Music activity selected');
+    Navigator.push(context, MaterialPageRoute(builder: (context) => MusicPlayer()));
   }
 
   void _onExercisesSelected() {

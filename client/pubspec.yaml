@@ -40,6 +40,8 @@ dependencies:
   flutter_onboarding_slider: ^1.0.11
   fluttertoast: ^8.2.8
   google_sign_in: ^6.2.1
+  just_audio: ^0.9.41
+  just_audio_background: ^0.0.1-beta.13
   provider: ^6.1.2
   shared_preferences: ^2.3.2
 

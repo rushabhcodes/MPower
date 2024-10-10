@@ -12,83 +12,124 @@ class AiChat extends StatefulWidget {
 class _AiChatState extends State<AiChat> {
   final Gemini gemini = Gemini.instance;
   List<ChatMessage> messages = [];
-  bool isLoading = false; // State to manage loading
-
-  ChatUser currentUser = ChatUser(id: "0", firstName: "User");
-  ChatUser geminiUser = ChatUser(
+  bool isLoading = false;
+  String partialResponse = '';
+  
+  final ChatUser currentUser = ChatUser(id: "0", firstName: "User");
+  final ChatUser geminiUser = ChatUser(
     id: "1",
     firstName: "MM",
-    profileImage:
-        "https://seeklogo.com/images/G/google-gemini-logo-A5787B2669-seeklogo.com.png",
+    profileImage: "https://seeklogo.com/images/G/google-gemini-logo-A5787B2669-seeklogo.com.png",
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildUI(),
-    );
-  }
-
-  Widget _buildUI() {
-    return DashChat(
-      inputOptions: const InputOptions(
-        trailing: [], // Removed the image upload button
-        inputDecoration: InputDecoration(
-          hintText: 'Type a message',
-          hintStyle: TextStyle(color: Colors.grey), // Change hint color
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black), // Border color
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black), // Border color on focus
-          ),
-        ),
+      appBar: AppBar(
+        title: const Text('AI Assistant'),
+        centerTitle: true,
       ),
-      currentUser: currentUser,
-      onSend: _sendMessage,
-      messages: messages,
+      body: Stack(
+        children: [
+          DashChat(
+            inputOptions: InputOptions(
+              trailing: [],
+              sendOnEnter: true,
+              textInputAction: TextInputAction.send,
+              inputTextStyle: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+              ),
+              inputDecoration: InputDecoration(
+                hintText: 'Ask me anything...',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+            ),
+            messageOptions: const MessageOptions(
+              showTime: true,
+              textColor: Colors.black,
+            ),
+            currentUser: currentUser,
+            onSend: _handleMessage,
+            messages: messages,
+          ),
+          if (isLoading)
+            Positioned(
+              bottom: 70,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'AI is thinking...',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
-  void _sendMessage(ChatMessage chatMessage) {
+  Future<void> _handleMessage(ChatMessage message) async {
     setState(() {
-      messages = [chatMessage, ...messages];
-      isLoading = true; // Set loading to true
+      messages.insert(0, message);
+      isLoading = true;
+      partialResponse = '';
     });
+
     try {
-      String question = chatMessage.text;
-      gemini.streamGenerateContent(question).listen((event) {
-        String response = event.content?.parts?.fold(
-              "", (previous, current) => "$previous ${current.text}",
-            ) ??
-            "";
-        ChatMessage message = ChatMessage(
-          user: geminiUser,
-          createdAt: DateTime.now(),
-          text: response,
-        );
-        setState(() {
-          messages = [message, ...messages];
-          isLoading = false; // Set loading to false
-        });
-      }, onError: (error) {
-        setState(() {
-          isLoading = false; // Set loading to false on error
-        });
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error')),
-        );
-      });
+      String prompt = '''
+      Please provide a clear and concise response (preferably under 200 words).
+      Context: ${message.text}
+      ''';
+
+      await for (final event in gemini.streamGenerateContent(prompt)) {
+        final text = event.content?.parts?.firstOrNull?.text ?? '';
+        
+        if (text.isNotEmpty) {
+          setState(() {
+            partialResponse += text;
+            
+            if (messages.length > 1 && messages[0].user.id == geminiUser.id) {
+              messages[0] = ChatMessage(
+                user: geminiUser,
+                createdAt: DateTime.now(),
+                text: partialResponse.trim(),
+              );
+            } else {
+              messages.insert(0, ChatMessage(
+                user: geminiUser,
+                createdAt: DateTime.now(),
+                text: partialResponse.trim(),
+              ));
+            }
+          });
+        }
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false; // Set loading to false on catch
-      });
-      print(e);
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
+    } finally {
+      setState(() {
+        isLoading = false;
+        partialResponse = '';
+      });
     }
   }
 }
