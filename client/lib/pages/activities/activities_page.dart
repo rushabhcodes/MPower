@@ -1,3 +1,5 @@
+import 'package:client/pages/activities/breathing_excersise_screen.dart';
+import 'package:client/pages/activities/bubble_game.dart';
 import 'package:flutter/material.dart';
 
 class ActivitiesScreen extends StatelessWidget {
@@ -18,8 +20,8 @@ class ActivitiesScreen extends StatelessWidget {
           crossAxisSpacing: 16.0,
           mainAxisSpacing: 16.0,
           children: [
-            _buildActivityButton(context, 'Breathing', _onBreathingSelected),
-            _buildActivityButton(context, 'Bubble Burst', _onBubbleBurstSelected),
+            _buildActivityButton(context, 'Breathing',() => _onBreathingSelected(context)),
+            _buildActivityButton(context, 'Bubble Burst',() => _onBubbleBurstSelected(context)),
             _buildActivityButton(context, 'Soothing Music', _onSoothingMusicSelected),
             _buildActivityButton(context, 'Exercises', _onExercisesSelected),
           ],
@@ -44,14 +46,16 @@ class ActivitiesScreen extends StatelessWidget {
     );
   }
 
-  void _onBreathingSelected() {
+  void _onBreathingSelected(context) {
     // Navigate to Breathing activity
     print('Breathing activity selected');
+    Navigator.push(context, MaterialPageRoute(builder: (context) => BreathingPage()));
   }
 
-  void _onBubbleBurstSelected() {
+  void _onBubbleBurstSelected(context) {
     // Navigate to Bubble Burst activity
     print('Bubble Burst activity selected');
+    Navigator.push(context, MaterialPageRoute(builder: (context) => BubbleGamePage()));
   }
 
   void _onSoothingMusicSelected() {
