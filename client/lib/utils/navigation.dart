@@ -1,3 +1,5 @@
+import 'package:client/pages/home/docter_home_screen.dart';
+import 'package:client/pages/login/doctor_signup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:client/pages/home/home_page.dart';
 import 'package:client/pages/intro/intro_page.dart';
@@ -15,6 +17,8 @@ class Routes {
   static const String homeScreen = '/home';
   static const String resetPasswordScreen = '/reset_password';
   static const String userDataCollection = '/user_data_collection';
+  static const String doctorSignupScreen = '/doctor_signup';
+  static const String doctorHomeScreen = '/doctor_home';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -32,6 +36,12 @@ class Routes {
         return MaterialPageRoute(builder: (_) => ResetPasswordScreen());
       case userDataCollection:
         return MaterialPageRoute(builder: (_) => UserDataCollection());
+      
+      case doctorSignupScreen:
+        return MaterialPageRoute(builder: (_) => DoctorSignupScreen());
+        
+      case doctorHomeScreen:
+        return MaterialPageRoute(builder: (_) => DoctorHomeScreen());
       default:
         return _errorRoute();
     }

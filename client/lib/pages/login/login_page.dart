@@ -1,5 +1,4 @@
-// ignore_for_file: prefer_const_constructors
-
+// login_screen.dart
 import 'package:client/utils/navigation.dart';
 import 'package:client/utils/theme_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,7 +35,7 @@ class LoginScreen extends StatelessWidget {
             Spacer(),
             Center(
               child: Image.asset(
-                'assets/icon.png', // Ensure your logo is in the assets folder
+                'assets/icon.png',
                 width: 100,
                 height: 100,
                 color: Theme.of(context).colorScheme.onPrimary,
@@ -55,32 +54,25 @@ class LoginScreen extends StatelessWidget {
                             Navigator.pushNamed(context, Routes.signinScreen);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
+                            backgroundColor: Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 20),
+                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.login, // Replace with the icon you want
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                Icons.login,
+                                color: Theme.of(context).colorScheme.onBackground,
                               ),
-                              SizedBox(
-                                  width: 10), // Adjust the spacing as needed
+                              SizedBox(width: 10),
                               Text(
                                 'Login',
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground,
-                                  fontSize:
-                                      20, // Adjust the font size as needed
+                                  color: Theme.of(context).colorScheme.onBackground,
+                                  fontSize: 20,
                                 ),
                               ),
                             ],
@@ -98,34 +90,26 @@ class LoginScreen extends StatelessWidget {
                             signInGoogle(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
+                            backgroundColor: Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 20),
+                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Image.asset(
-                                  'assets/google-icon.png', // Adjust the path as per your project structure
-                                  height: 20,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground // Adjust the size as needed
-                                  ),
-                              SizedBox(
-                                  width: 10), // Adjust the spacing as needed
+                                'assets/google-icon.png',
+                                height: 20,
+                                color: Theme.of(context).colorScheme.onBackground,
+                              ),
+                              SizedBox(width: 10),
                               Text(
                                 'Continue with Google',
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground,
-                                  fontSize:
-                                      20, // Adjust the font size as needed
+                                  color: Theme.of(context).colorScheme.onBackground,
+                                  fontSize: 20,
                                 ),
                               ),
                             ],
@@ -134,17 +118,33 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 40),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.signupScreen);
-                    },
-                    child: Text(
-                      'Don\'t have an account? Sign Up',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.signupScreen);
+                        },
+                        child: Text(
+                          'Sign Up as Patient',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
-                    ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.doctorSignupScreen);
+                        },
+                        child: Text(
+                          'Sign Up as Doctor',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 40),
                 ],
@@ -174,61 +174,49 @@ class LoginScreen extends StatelessWidget {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
 
-      Navigator.pop(context); // Remove loading indicator
+      Navigator.pop(context);
 
       if (userCredential.user != null) {
         if (userCredential.user!.emailVerified) {
-          // Check if user data exists
           final databaseReference = FirebaseDatabase.instance.ref();
-          final userDataSnapshot = await databaseReference
+          
+          // Check both user types (patient and doctor)
+          final patientDataSnapshot = await databaseReference
               .child('users')
               .child(userCredential.user!.uid)
               .get();
+              
+          final doctorDataSnapshot = await databaseReference
+              .child('doctors')
+              .child(userCredential.user!.uid)
+              .get();
 
-          if (userDataSnapshot.exists) {
-            // User data exists, go to home screen
+          if (patientDataSnapshot.exists) {
             Navigator.pushReplacementNamed(context, Routes.homeScreen);
+          } else if (doctorDataSnapshot.exists) {
+            Navigator.pushReplacementNamed(context, Routes.doctorHomeScreen);
           } else {
-            // User data doesn't exist, go to data collection page
             Navigator.pushReplacementNamed(context, Routes.userDataCollection);
           }
         } else {
-          // Email is not verified
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Please verify your email before logging in.')),
+            SnackBar(content: Text('Please verify your email before logging in.')),
           );
-          // Optionally, offer to resend verification email
           bool? resend = await showDialog<bool>(
             context: context,
             builder: (BuildContext context) {
               final theme = Theme.of(context);
               return AlertDialog(
                 backgroundColor: theme.colorScheme.background,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                title: Text(
-                  'Email not verified',
-                  style: TextStyle(color: theme.colorScheme.onPrimary),
-                ),
-                content: Text(
-                  'Would you like to resend the verification email?',
-                  style: TextStyle(color: theme.colorScheme.primary),
-                ),
+                title: Text('Email not verified'),
+                content: Text('Would you like to resend the verification email?'),
                 actions: <Widget>[
                   TextButton(
-                    child: Text(
-                      'No',
-                      style: TextStyle(color: theme.colorScheme.onPrimary),
-                    ),
+                    child: Text('No'),
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   ElevatedButton(
                     child: Text('Yes'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.background,
-                      backgroundColor: theme.colorScheme.onPrimary,
-                    ),
                     onPressed: () => Navigator.of(context).pop(true),
                   ),
                 ],
@@ -238,17 +226,14 @@ class LoginScreen extends StatelessWidget {
           if (resend == true) {
             await userCredential.user!.sendEmailVerification();
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      'Verification email sent. Please check your inbox.')),
+              SnackBar(content: Text('Verification email sent. Please check your inbox.')),
             );
           }
-          // Sign out the user since they haven't verified their email
           await FirebaseAuth.instance.signOut();
         }
       }
     } catch (e) {
-      Navigator.pop(context); // Remove loading indicator
+      Navigator.pop(context);
       Fluttertoast.showToast(
         msg: 'Sign in failed: $e',
         toastLength: Toast.LENGTH_LONG,
@@ -261,3 +246,5 @@ class LoginScreen extends StatelessWidget {
     }
   }
 }
+
+// doctor_signup_screen.dart
