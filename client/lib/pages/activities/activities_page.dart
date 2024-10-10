@@ -50,7 +50,7 @@ class ActivitiesScreen extends StatelessWidget {
     // Navigate to Breathing activity
     print('Breathing activity selected');
     Navigator.push(context, MaterialPageRoute(builder: (context) => BreathingPage()));
-  }
+  } 
 
   void _onBubbleBurstSelected(context) {
     // Navigate to Bubble Burst activity
